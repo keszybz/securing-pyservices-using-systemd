@@ -33,7 +33,7 @@
   \medskip
   \ccbysa
 }
-\date{\tiny PyConPL, 3.11.2022} % third day of the month of falling leaves, the third year of the pandemic
+\date{\tiny PyConPL, 5.11.2022} % fifth day of the month of falling leaves, the third year of the pandemic
 
 \begin{document}
 \begin{frame}
@@ -48,23 +48,28 @@
   \item python — example service
   \item systemd — unit protections
   \item hardening the example service
-  \item systemd-python and pystemd
-  \item pystemd — managing services
+  \item hardening the example service more
+  \item passing zecure sekretz to the service
+  \item (pystemd — starting transient services)
   \end{itemize}
 \end{frame}
 
 \begin{frame}
   \frametitle{systemd units}
 
-  traditional approach: \texttt{/usr/lib/systemd/system/foobar.service}
+  traditional approach:\\ \texttt{\color{brown} /usr/lib/systemd/system/foobar.service}
 
   \quad
 
-  alternative approach: \texttt{systemd-run -u foobar.service …}
+  alternative approach:\\ \texttt{\color{teal} systemd-run -u foobar.service …}
 \end{frame}
 
 \begin{frame}
   \frametitle{\texttt{tonietak.py}}
+
+  \hfill\href{https://github.com/keszybz/securing-pyservices-using-systemd/blob/main/service/tonietak.py}{\includegraphics[width=0.5\textwidth]{images/tonietak.png}}\hfill{}
+
+  \hfill\href{https://github.com/keszybz/securing-pyservices-using-systemd/blob/main/service/tonietak.py}{github.com/keszybz/…/tonietak.py}\hfill{}
 \end{frame}
 
 \begin{frame}
@@ -90,16 +95,103 @@
   \end{itemize}
 \end{frame}
 
+\begin{frame}
+  \frametitle{Unit protections — more}
+
+  \begin{itemize}
+  \item ProtectTmp=yes
+  \item PrivateNetworking=yes
+  \item SystemCallFilter=\\
+        \texttt{systemd-analyze syscall-filter}
+    
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Encrypted Secrets}
+
+  \begin{itemize}
+  \item \texttt{systemd-creds encrypt}
+  \item \texttt{LoadCredentialEncrypted=}
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Finding ideas for more protection directives}
+
+  \begin{minted}{bash}
+systemd-analyze security run-u4020.service
+  \end{minted}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Putting the service in production}
+
+  Running from the command-line is not a deployment strategy.
+
+  How to make the unit permanent?
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Strategy I: save file}
+
+  \begin{minted}{bash}
+systemctl cat run-u3563.service
+
+src=$(systemctl show -P FragmentPath run-u3563.service)
+sudo cp "$src" \
+    /etc/systemd/system/flask-app-tonietak.service
+\end{minted}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Strategy II: \texttt{pystemd}}
+
+  \begin{minted}{python}
+import pystemd.run
+
+cmd = 'flask --app tonietak run'.split()
+
+properties = dict(
+  DynamicUser=True,
+  StateDirectory='files',
+  WorkingDirectory='/var/lib',
+  ProtectHome='yes',
+  ProtectSystem='yes',
+  # LoadCredentialEncrypted='password.bin',
+)
+
+pystemd.run(cmd, extra=properties)
+  \end{minted}
+\end{frame}
+
 \begin{frame}[fragile]
   \frametitle{Acknowledgments and links}
 
   Kushal Das — ``Securing Services Using systemd''\\
-  \url{https://www.youtube.com/watch?v=UUW8RO4hkg0}
+  \url{https://www.youtube.com/watch?v=UUW8RO4hkg0},
+  \href{https://github.com/kushaldas/verybad/blob/main/src/main.rs}{verybad.rs}
+
+  \vfill
+
+  \url{https://flask.palletsprojects.com/en/2.2.x/}{flask}\\
+  (\textcolor{gray}{with apologies to all flask developers ;)})
 
   \vfill
 
   \href{https://www.freedesktop.org/software/systemd/man/systemd.exec.html}{systemd.exec(5)},
   \href{https://www.freedesktop.org/software/systemd/man/systemd.directives.html}{systemd.directives(5)}
+
+  \vfill
+
+  \href{https://pypi.org/project/pystemd/}{pystemd},
+  \href{https://github.com/facebookincubator/pystemd/blob/master/_docs/pystemd.run.md}{pystemd.run}
+
+  \vfill
+
+  \textcolor{teal}{\href{https://raw.githubusercontent.com/keszybz/securing-pyservices-using-systemd/main/systemd-python-services.pdf}{systemd-python-services.pdf}} (these slides),
+  \textcolor{teal}{\href{https://github.com/keszybz/securing-pyservices-using-systemd/blob/main/service/tonietak.py}{tonietak.py}}
 \end{frame}
 
 
