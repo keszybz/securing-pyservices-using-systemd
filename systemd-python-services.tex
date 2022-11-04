@@ -1,0 +1,106 @@
+\documentclass[]{beamer}
+%\usepackage[utopia]{mathdesign}
+%\usepackage[no-math]{fontspec}
+%\setmainfont{Liberation Serif}
+
+\usepackage{minted}
+% \usepackage{redhat}
+\usepackage{hyperref}
+\usepackage{ccicons}
+\usepackage{ulem}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,snakes,automata,backgrounds,petri}
+
+%gets rid of bottom navigation bars
+\setbeamertemplate{footline}[page number]{}
+
+%gets rid of navigation symbols
+\setbeamertemplate{navigation symbols}{}
+
+\newcommand{\done}{\textcolor{teal}{\checkmark}}
+\newcommand{\pull}[3]{\href{https://github.com/systemd/#1/pulls/#2}{#3 (\##2)}}
+\newcommand{\pulldone}[3]{\pull{#1}{#2}{#3} \done}
+\newcommand{\commit}[3]{\href{https://github.com/systemd/#1/commit/#2}{#3 (#2)}}
+\newcommand{\commitdone}[3]{\commit{#1}{#2}{#3} \done}
+
+\title{Securing Python services using systemd}
+\author{Zbigniew Jędrzejewski-Szmek}
+\institute{%
+  \includegraphics[width=0.4\textwidth]{images/Logo-redhat-color-375.png}\\
+  \medskip
+  \textit{zbyszek@in.waw.pl}\\
+  \medskip
+  \ccbysa
+}
+\date{\tiny PyConPL, 3.11.2022} % third day of the month of falling leaves, the third year of the pandemic
+
+\begin{document}
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+  \frametitle{Agenda}
+
+  \begin{itemize}
+  \item systemd — running services
+  \item python — example service
+  \item systemd — unit protections
+  \item hardening the example service
+  \item systemd-python and pystemd
+  \item pystemd — managing services
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{systemd units}
+
+  traditional approach: \texttt{/usr/lib/systemd/system/foobar.service}
+
+  \quad
+
+  alternative approach: \texttt{systemd-run -u foobar.service …}
+\end{frame}
+
+\begin{frame}
+  \frametitle{\texttt{tonietak.py}}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Unit protections}
+
+  \begin{itemize}
+  \item User=
+  \item DynamicUser=yes
+
+  \item StateDirectory=yes
+  \item WorkingDirectory=yes
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Unit protections}
+
+  \begin{itemize}
+  \item ProtectHome=yes
+  \item ProtectSystem=yes
+  \item NoExecPaths=
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Acknowledgments and links}
+
+  Kushal Das — ``Securing Services Using systemd''\\
+  \url{https://www.youtube.com/watch?v=UUW8RO4hkg0}
+
+  \vfill
+
+  \href{https://www.freedesktop.org/software/systemd/man/systemd.exec.html}{systemd.exec(5)},
+  \href{https://www.freedesktop.org/software/systemd/man/systemd.directives.html}{systemd.directives(5)}
+\end{frame}
+
+
+\end{document}

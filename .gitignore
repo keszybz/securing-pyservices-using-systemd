@@ -1,0 +1,11 @@
+*~
+/*.aux
+/*.log
+/*.nav
+/*.out
+/*.snm
+/*.toc
+/*.vrb
+/_minted-*/
+/files/
+__pycache__
