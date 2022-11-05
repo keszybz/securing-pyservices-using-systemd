@@ -27,7 +27,8 @@
 \title{Securing Python services using systemd}
 \author{Zbigniew Jędrzejewski-Szmek}
 \institute{%
-  \includegraphics[width=0.4\textwidth]{images/Logo-redhat-color-375.png}\\
+  \medskip
+  \includegraphics[width=0.2\textwidth]{images/Logo-redhat-color-375.png}\\
   \medskip
   \textit{zbyszek@in.waw.pl}\\
   \medskip
@@ -55,13 +56,14 @@
 \end{frame}
 
 \begin{frame}
-  \frametitle{systemd units}
+  \frametitle{Why?}
 
-  traditional approach:\\ \texttt{\color{brown} /usr/lib/systemd/system/foobar.service}
-
-  \quad
-
-  alternative approach:\\ \texttt{\color{teal} systemd-run -u foobar.service …}
+  \begin{itemize}
+  \item systemd is probably already there
+  \item we have to have a deployment method anyway?
+  \item defence in depth?
+  \item smiley emoji's from analysis tools?
+  \end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -70,6 +72,16 @@
   \hfill\href{https://github.com/keszybz/securing-pyservices-using-systemd/blob/main/service/tonietak.py}{\includegraphics[width=0.5\textwidth]{images/tonietak.png}}\hfill{}
 
   \hfill\href{https://github.com/keszybz/securing-pyservices-using-systemd/blob/main/service/tonietak.py}{github.com/keszybz/…/tonietak.py}\hfill{}
+\end{frame}
+
+\begin{frame}
+  \frametitle{systemd units}
+
+  traditional approach:\\ \texttt{\color{brown} /usr/lib/systemd/system/foobar.service}
+
+  \quad
+
+  alternative approach:\\ \texttt{\color{teal} systemd-run -u foobar.service …}
 \end{frame}
 
 \begin{frame}
@@ -99,12 +111,22 @@
   \frametitle{Unit protections — more}
 
   \begin{itemize}
-  \item ProtectTmp=yes
+  \item PrivateTmp=yes
   \item PrivateNetworking=yes
   \item SystemCallFilter=\\
-        \texttt{systemd-analyze syscall-filter}
+        (\texttt{systemd-analyze syscall-filter})
     
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Finding ideas for more protection directives}
+
+  \begin{minted}{bash}
+man 5 systemd.exec
+
+systemd-analyze security run-u4020.service
+  \end{minted}
 \end{frame}
 
 \begin{frame}
@@ -115,14 +137,6 @@
   \item \texttt{LoadCredentialEncrypted=}
 
   \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Finding ideas for more protection directives}
-
-  \begin{minted}{bash}
-systemd-analyze security run-u4020.service
-  \end{minted}
 \end{frame}
 
 \begin{frame}
